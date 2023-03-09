@@ -19,7 +19,6 @@ def MLKF_Ndof(m1, l1, k1, f1, m2, l2, k2):
     """Return mass, damping, stiffness & force matrices for 2DOF system"""
 
     M = np.zeros((len(m2) + 1, len(m2) + 1))
-    print(type(M))
     M[0][0] = -m1
     for i, m in enumerate(m2):
         M[1 + i][1 + i] = m
@@ -39,7 +38,6 @@ def MLKF_Ndof(m1, l1, k1, f1, m2, l2, k2):
 
     F = np.zeros((len(m2) + 1,))
     F[0] = f1
-    print(type(M))
     return M, L, K, F
 
 
@@ -65,16 +63,10 @@ def time_response(t_list, M, L, K, F):
 
     mm = M.diagonal()
 
-    print(type(M))
 
     def slope(t, y):
         xv = y.reshape((2, -1))
         a = (F - L @ xv[1] - K @ xv[0]) / mm
-        print(xv.shape)
-        print(F.shape)
-        print(L.shape)
-        print(K.shape)
-        print(a.shape)
         s = np.concatenate((xv[1], a))
         return s
 
@@ -85,13 +77,11 @@ def time_response(t_list, M, L, K, F):
         method="Radau",
         t_eval=t_list,
     )
-
     return solution.y[0 : len(mm), :].T
 
 
 def last_nonzero(arr, axis, invalid_val=-1):
     """Return index of last non-zero element of an array"""
-
     mask = arr != 0
     val = arr.shape[axis] - np.flip(mask, axis=axis).argmax(axis=axis) - 1
     return np.where(mask.any(axis=axis), val, invalid_val)
@@ -104,12 +94,12 @@ def plot(hz, sec, M, L, K, F):
 
     f_response = np.abs(freq_response(hz * 2 * np.pi, M, L, K, F))
     t_response = time_response(sec, M, L, K, F)
-    print(t_response.shape())
+    t_response[:, 1:] += t_response[:, 0:1]
 
     # Determine suitable legends
 
     f_legends = (
-        "m{} peak {:.4g} metre at {:.4g} Hz".format(i + 1, f_response[m][i], hz[m])
+        "m{} peak {:.4g} metre at {:.4g} Hz".format(i, f_response[m][i], hz[m])
         for i, m in enumerate(np.argmax(f_response, axis=0))
     )
 
@@ -118,7 +108,7 @@ def plot(hz, sec, M, L, K, F):
     lastbig = last_nonzero(toobig, axis=0, invalid_val=len(sec) - 1)
 
     t_legends = (
-        "m{} settled to 2% beyond {:.4g} sec".format(i + 1, sec[lastbig[i]])
+        "m{} settled to 2% beyond {:.4g} sec".format(i, sec[lastbig[i]])
         for i, _ in enumerate(t_response.T)
     )
 
@@ -165,7 +155,6 @@ def main():
 
     M, L, K, F = MLKF_Ndof(m1, l1, k1, f1, m2, l2, k2)
 
-    print(type(M))
 
     # Generate frequency and time arrays
 
