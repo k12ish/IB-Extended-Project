@@ -65,6 +65,10 @@ def time_response(t_list, M, L, K, F):
 
 
     def slope(t, y):
+        print(y.shape)
+        print(F.shape)
+        print(K.shape)
+        print(L.shape)
         xv = y.reshape((2, -1))
         a = (F - L @ xv[1] - K @ xv[0]) / mm
         s = np.concatenate((xv[1], a))
@@ -73,7 +77,7 @@ def time_response(t_list, M, L, K, F):
     solution = scipy.integrate.solve_ivp(
         fun=slope,
         t_span=(t_list[0], t_list[-1]),
-        y0=np.zeros(len(mm) ** 2),
+        y0=np.zeros(len(mm) * 2),
         method="Radau",
         t_eval=t_list,
     )
@@ -149,9 +153,9 @@ def main():
         k2 = [53.4]
 
     else:
-        m2 = [0.6]
-        l2 = [0.5]
-        k2 = [53.4]
+        m2 = [0.6, 0.6, 0.6, 0.6, 0.6]
+        l2 = [0.5, 0.5, 0.5, 0.5, 0.5]
+        k2 = [53.4, 53.4, 53.4, 53.4, 53.4]
 
     M, L, K, F = MLKF_Ndof(m1, l1, k1, f1, m2, l2, k2)
 
